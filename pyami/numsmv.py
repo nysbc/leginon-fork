@@ -283,7 +283,7 @@ def write(a, imfile=None, offset=0, header_updates={}):
 		v = header_updates[k]
 		headerdict = updateHeader(headerdict,k,v)
 	# new header has complete default values
-	headbytes = formatHeader(headerdict)
+	headbytes = bytes(formatHeader(headerdict),encoding='utf-8')
 	outf = open(imfile,'wb')
 	outf.write(headbytes)
 	outf.write(a)
