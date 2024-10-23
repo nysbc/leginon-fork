@@ -1521,8 +1521,20 @@ class Krios(tem.TEM):
 			# value is zero or screen is up.
 			return 0.0
 
+class KriosXL(Krios):
+	name = 'KriosXL'
+	column_type = 'titan'
+	use_normalization = True
+	projection_lens_program = 'TEM XL'
+
 class EFKrios(Krios):
 	name = 'EF-Krios'
 	column_type = 'titan'
 	use_normalization = True
 	projection_lens_program = 'EFTEM'
+
+class EFKriosXL(EFKrios):
+	name = 'EF-KriosXL'
+	column_type = 'titan'
+	use_normalization = True
+	projection_lens_program = 'EFTEM XL'
