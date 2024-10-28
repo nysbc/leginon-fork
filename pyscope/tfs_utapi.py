@@ -278,6 +278,7 @@ class Logger(object):
 
 class Krios(tem.TEM):
 	name = 'Krios'
+	default_stage_speed_fraction = 1.0
 	# (pyscope value, utapi CONSTANT)
 	cm_projection_mode_map = [	('imaging','PROJECTION_MODE_IMAGING'),
 							('diffraction', 'PROJECTION_MODE_DIFFRACTION')
@@ -313,6 +314,7 @@ class Krios(tem.TEM):
 		self.cold_feg_flash_types = {'low':1,'high':2}
 		self.beamstop_device_id = dip.DeviceIdRequest(id='BeamStopper')
 		# default to let the scope control auto normalization.
+		self.stage_speed_fraction = self.default_stage_speed_fraction
 		self.noramlize_all_after_setting = False
 		self.need_normalize_all = False
 		self.sup_mag_data = {}
@@ -320,6 +322,12 @@ class Krios(tem.TEM):
 		self.projection_submode_map ={}
 		self.logger = Logger()
 		self.stage_logger = Logger()
+        # loading fei.cfg
+		self.correctedstage = self.getFeiConfig('stage','do_stage_xyz_backlash')
+		self.corrected_alpha_stage = self.getFeiConfig('stage','do_stage_alpha_backlash')
+		self.alpha_backlash_delta = self.getFeiConfig('stage','stage_alpha_backlash_angle_delta')
+		self.normalize_all_after_setting = self.getFeiConfig('optics','force_normalize_all_after_setting')
+        # logging
 		if self.getDebugAll():
 			self.logger.setLevel(3)
 			self.stage_logger.setLevel(3)
@@ -858,7 +866,7 @@ class Krios(tem.TEM):
 		#
 		vector = _make_vector(vector, original_vector, relative)
 		vec = original_vector
-		if abs(vec['x']-vector['x'])+abs(vec['x']-vector['y']) < min_move:
+		if abs(vec['x']-vector['x'])+abs(vec['y']-vector['y']) < min_move:
 			# small move is ignored.
 			return
 		v_req = vctr_p.Vector(x=vector['x'],y=vector['y'])
@@ -1310,6 +1318,29 @@ class Krios(tem.TEM):
 			donetime = time.time() - t0
 			print('took extra %.1f seconds to get to ready status' % (donetime))
 
+	def getMinimumStageMovement(self):
+		return self.getFeiConfig('stage','minimum_stage_movement')
+
+	def getXYZStageBacklashDelta(self):
+		value = self.getFeiConfig('stage','xyz_stage_backlash_delta')
+		if value is None:
+			value = 0
+		return value
+
+	def getXYStageRelaxDistance(self):
+		relax = self.getFeiConfig('stage','xy_stage_relax_distance')
+		if relax is None:
+			relax = 0
+		return relax
+
+	def setCorrectedStagePosition(self, value):
+		self.correctedstage = bool(value)
+		return self.correctedstage
+
+	def getCorrectedStagePosition(self):
+		return self.correctedstage
+
+
 	def _getStageLimits(self):
 		"""
 		Return limits for stage movement.  The returned value puts limit
@@ -1353,6 +1384,32 @@ class Krios(tem.TEM):
 	def checkStageLimits(self, position):
 		self._validateStageLimit(position,['x','y','z','a','b'])
 
+	def checkStageLimits(self, position):
+		self._checkStageXYZLimits(position)
+		self._checkStageABLimits(position)
+
+	def _checkStageXYZLimits(self, position):
+		limit = self.getStageLimits()
+		intersection = set(position.keys()).intersection(('x','y','z'))
+		for axis in intersection:
+			self._validateStageAxisLimit(position[axis], axis)
+
+	def _checkStageABLimits(self, position):
+		limit = self.getStageLimits()
+		intersection = set(position.keys()).intersection(('a','b'))
+		for axis in intersection:
+			self._validateStageAxisLimit(position[axis], axis)
+
+	def _validateStageAxisLimit(self, p, axis):
+		limit = self.getStageLimits()
+		if not (limit[axis][0] < p and limit[axis][1] > p):
+			if axis in ('x','y','z'):
+				um_p = p*1e6
+				raise ValueError('Requested %s axis position %.1f um out of range.' % (axis,um_p))
+			else:
+				deg_p = math.degrees(p)
+				raise ValueError('Requested %s axis position %.1f degrees out of range.' % (axis,deg_p))
+
 	def checkStagePosition(self, position):
 		self.checkStageLimits(position)
 		current = self.getStagePosition()
@@ -1364,6 +1421,13 @@ class Krios(tem.TEM):
 				if delta > minimum_stage[axis]:
 					bigenough[axis] = position[axis]
 		return bigenough
+
+	def resetStageSpeed(self):
+		self.stage_speed_fraction = self.default_stage_speed_fraction
+
+	def setStageSpeed(self, value):
+		self.speed_deg_per_second = float(value)
+		self.stage_speed_fraction = min(value/self.stage_top_speed,1.0)
 
 	def _setStagePosition(self, position, relative = 'absolute'):
 		self.waitForStageReady('before setting %s' % (position,))
