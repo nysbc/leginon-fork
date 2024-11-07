@@ -168,6 +168,7 @@ class GatanSocket(object):
 			('IFSetSlitIn', 'SetEnergyFilter'),
 			('IFGetEnergyLoss', 'GetEnergyFilterOffset'),
 			('IFSetEnergyOffset', 'SetEnergyFilterOffset'), #wjr this was IFSetEnergyLoss
+			('IFGetMaximumSlitWidth', 'GetEnergyFilterWidthMax'),
 			('IFGetSlitWidth', 'GetEnergyFilterWidth'),
 			('IFSetSlitWidth', 'SetEnergyFilterWidth'),
 			('GT_CenterZLP', 'AlignEnergyFilterZeroLossPeak'),
@@ -405,6 +406,12 @@ class GatanSocket(object):
 			i = 0
 		script = '%s(%d); %s' % (self.filter_functions['SetEnergyFilter'], i, self.wait_for_filter)
 		return self.ExecuteSendScript(script)
+
+	def GetEnergyFilterWidthMax(self):
+		if 'GetEnergyFilterWidthMax' not in list(self.filter_functions.keys()):
+			return -1.0
+		script = 'Exit(%s())' % (self.filter_functions['GetEnergyFilterWidthMax'],)
+		return self.ExecuteGetDoubleScript(script)
 
 	def GetEnergyFilterWidth(self):
 		if 'GetEnergyFilterWidth' not in list(self.filter_functions.keys()):

@@ -155,7 +155,7 @@ class viewer {
 			$selector = '<select name="scopeId" onchange="newexp()">'.$this->crlf;
 			foreach ((array)$scopes as $scope) {
 				if ($scope['id']==$this->scopeId) $s='selected'; else $s='';
-				$scope_alias = ($scope[description]) ? $scope[description]: $scope[hostname].'-'.$scope['name'];
+				$scope_alias = ($scope['description']) ? $scope['description']: $scope['hostname'].'-'.$scope['name'];
 				$selector .= '<option value='.$scope['id'].' '.$s.' >'
 						.$scope_alias.'</option>'.$this->crlf;
 			}
