@@ -3028,14 +3028,6 @@ class ImageCommentData(InSessionData):
 		)
 	typemap = classmethod(typemap)
 
-class ImageStatusData(InSessionData):
-	def typemap(cls):
-		return InSessionData.typemap() + (
-			('image', AcquisitionImageData),
-			('status', str),
-		)
-	typemap = classmethod(typemap)
-
 class ImageBackup(InSessionData):
 	def typemap(cls):
 		return InSessionData.typemap() + (
@@ -3307,6 +3299,9 @@ class ZeroLossIceThicknessSettingsData(SettingsData):
 			('obj mean free path', float),
 			('vacuum intensity', float),
 			('use_best_quart_stats', bool),
+			('cfeg',bool),
+			('cfeg_slope',float),
+			('cfeg_intercept',float),
 		)
 	typemap = classmethod(typemap)
 

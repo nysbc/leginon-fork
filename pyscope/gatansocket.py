@@ -70,7 +70,7 @@ Initialize with the sequences of args (longs, bools, doubles)
 and optional long array.
 	'''
 #Strings are packaged as long array using numpy.frombuffer(bytes(buffer,'utf-8'),numpy.int32)
-# and can be converted back with longarray.tostring()
+# and can be converted back with longarray.tobytes()
 	def __init__(self, longargs=[], boolargs=[], dblargs=[], longarray=[]):
 		# add final longarg with size of the longarray
 		if len(longarray):
@@ -168,6 +168,7 @@ class GatanSocket(object):
 			('IFSetSlitIn', 'SetEnergyFilter'),
 			('IFGetEnergyLoss', 'GetEnergyFilterOffset'),
 			('IFSetEnergyOffset', 'SetEnergyFilterOffset'), #wjr this was IFSetEnergyLoss
+			('IFGetMaximumSlitWidth', 'GetEnergyFilterWidthMax'),
 			('IFGetSlitWidth', 'GetEnergyFilterWidth'),
 			('IFSetSlitWidth', 'SetEnergyFilterWidth'),
 			('GT_CenterZLP', 'AlignEnergyFilterZeroLossPeak'),
@@ -406,6 +407,12 @@ class GatanSocket(object):
 		script = '%s(%d); %s' % (self.filter_functions['SetEnergyFilter'], i, self.wait_for_filter)
 		return self.ExecuteSendScript(script)
 
+	def GetEnergyFilterWidthMax(self):
+		if 'GetEnergyFilterWidthMax' not in list(self.filter_functions.keys()):
+			return -1.0
+		script = 'Exit(%s())' % (self.filter_functions['GetEnergyFilterWidthMax'],)
+		return self.ExecuteGetDoubleScript(script)
+
 	def GetEnergyFilterWidth(self):
 		if 'GetEnergyFilterWidth' not in list(self.filter_functions.keys()):
 			return -1.0
@@ -425,33 +432,35 @@ class GatanSocket(object):
 		return self.ExecuteGetDoubleScript(script)
 
 	def SetEnergyFilterOffset(self, value):
-                # wjr changing this to use the Gatan function IFSetEnergyOffset, which needs a technique and a value
-                # GMS 3.32,function apparently added in GMS 3.2. Later versions will need to be checked
-                # technique 0: instrument (not available)
-                # technique 1: prism offset (confusing because -10 is 10)
-                # technique 2: HT offset (has no effect on BioQuantum, but HT offset in DM will change)
-                # technique 3: drift tube ( this seems best since the value is consistant with direction)
-                # technique 4: prism adjust (confusing because -10 is 10 and it does not count when checking the energy loss value)
-                # note: the Gatan function being called is a void, so removed the boolean logic used for most other functions
-                technique = 3 # hard code to drift tube for now
+		"""
+		wjr changing this to use the Gatan function IFSetEnergyOffset, which needs a technique and a value
+		GMS 3.32,function apparently added in GMS 3.2. Later versions will need to be checked
+		technique 0: instrument (not available)
+		technique 1: prism offset (confusing because -10 is 10)
+		technique 2: HT offset (has no effect on BioQuantum, but HT offset in DM will change)
+		technique 3: drift tube ( this seems best since the value is consistant with direction)
+		technique 4: prism adjust (confusing because -10 is 10 and it does not count when checking the energy loss value)
+		note: the Gatan function being called is a void, so removed the boolean logic used for most other functions
+		"""
+		technique = 3 # hard code to drift tube for now
 		if 'SetEnergyFilterOffset' not in list(self.filter_functions.keys()):
 			return -1.0
 		script = '%s(%i,%f)' % (self.filter_functions['SetEnergyFilterOffset'], technique, value)
 		self.ExecuteSendScript(script)
 #		return 1
-                # or better to 
-                newvalue =  self.GetEnergyFilterOffset()  #? but wastes time
-                if value == newvalue:
-                    return 1
-                else:
-                    technique = 2 # reset the HT offfset to 0, sometimes this gets set
-		    script = '%s(%i,%f)' % (self.filter_functions['SetEnergyFilterOffset'], technique, 0)
-		    self.ExecuteSendScript(script)
-                    newvalue =  self.GetEnergyFilterOffset()  
-                    if value == newvalue:
-                        return 1
-                    else:
-                        return -1
+		# or better to 
+		newvalue =  self.GetEnergyFilterOffset()  #? but wastes time
+		if value == newvalue:
+			return 1
+		else:
+			technique = 2 # reset the HT offfset to 0, sometimes this gets set
+			script = '%s(%i,%f)' % (self.filter_functions['SetEnergyFilterOffset'], technique, 0)
+			self.ExecuteSendScript(script)
+			newvalue =  self.GetEnergyFilterOffset()  
+			if value == newvalue:
+				return 1
+			else:
+				return -1
 
 	def AlignEnergyFilterZeroLossPeak(self):
 		script = ' if ( %s() ) { %s Exit(1.0); } else { Exit(-1.0); }' % (self.filter_functions['AlignEnergyFilterZeroLossPeak'], self.wait_for_filter)

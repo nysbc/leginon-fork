@@ -32,7 +32,7 @@ class particledata {
 					'xmipp'=>array('ApXmippCtfParamsData','xmipp_ctf_params'),
 					);
 
-	function particledata () {
+	function __construct () {
 		$this->mysql = new mysql(
 					DB_HOST,
 					DB_USER,
@@ -794,6 +794,7 @@ class particledata {
 	}
 
 	function getTiltSeries($sessionId) {
+		if (!$this->mysql->SQLTableExists(DB_LEGINON.".TiltSeriesData")) return array();
 		if($sessionId == NULL)
 			return array();
 		$query = "SELECT `DEF_id` as id, "
@@ -1877,7 +1878,7 @@ class particledata {
 			if (preg_match('~.img~', $s['name'])) $opvals.='|--|'.preg_replace('~img~','hed',$s['name']);
 			
 			// Add this stack to the options dictionary
-			$options[$opvals] = $s[shownstackname]." ID: ".$stackid[stackid]." (".$nump." particles, ".$showapix." &Aring;/pix, ".$box."x".$box.")";
+			$options[$opvals] = $s['shownstackname']." ID: ".$stackid['stackid']." (".$nump." particles, ".$showapix." &Aring;/pix, ".$box."x".$box.")";
 		}
 		
 		return $options;
@@ -1956,7 +1957,7 @@ class particledata {
 		$q = "select max(DEF_id) as runId "
 			." from ApAssessmentRunData where `REF|leginondata|SessionData|session` = '$sessionId'";
 		list($r) = $this->mysql->getSQLResult($q);
-		return $r[runId];
+		return $r['runId'];
 	}
 
 	function getAssessmentRunIds ($sessionId) {
@@ -2657,6 +2658,7 @@ class particledata {
 		$q.= "ORDER BY r.`DEF_id` DESC ";
 		//echo $q."<br/>\n";
 		$r = $this->mysql->getSQLResult($q);
+		if ($r === false) $r=array();
 		//echo print_r($r)."<br/>\n";
 		return $r;
 	}
@@ -3039,7 +3041,7 @@ class particledata {
 		// Parameters of original stack of the runs in stack
 		$selectionstacks = array();
 		foreach ($stackrunIds as $runid) {
-			$stackrunId = $runid[runid];
+			$stackrunId = $runid['runid'];
 			$rstack = $this->getOriginalStackFromStackRun($stackrunId);
 			$childstackId = $rstack['stackId'];
 			//Get Parameters
@@ -4127,6 +4129,7 @@ class particledata {
 
 	#--------- RECIPE BAKING FUNCTIONS---------------#
 	function getAllRecipeData() {
+		if (!$this->mysql->SQLTableExists("ApRecipeData")) return array();
 		# Return all recipe info
 		$q = "SELECT `DEF_id`, `name`, `description`, `ctfrunids`, "
 			."`REF|ApStackData|stack` as stackid, "
@@ -6397,6 +6400,7 @@ class particledata {
 	}
 	
 	function getCryosparcJobs($expId, $id=false) {
+		if (!$this->mysql->SQLTableExists("cryosparc")) return array();
 	    $q = "SELECT * from cryosparc WHERE expId = $expId";
 	    if ($id) $q.= " AND id = $id";
 	    return $this->mysql->getSQLResult($q);
