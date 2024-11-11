@@ -80,7 +80,7 @@ class SquareTargetOrderUpdater(object):
 		desired_imagelists = leginondata.ImageListData(targets=self.mosaic_targetlist).query()
 		desired_imagelists = list(map((lambda x:x.dbid), desired_imagelists))
 		self.logger.debug('imagelist dbids of label "%s": %s' % (mosaic_label,desired_imagelists))
-		blob_dicts = filter((lambda x: x['grid_id'] in desired_imagelists),blob_dicts)
+		blob_dicts = list(filter((lambda x: x['grid_id'] in desired_imagelists),blob_dicts))
 		if len(blob_dicts) == 0:
 				self.logger.error('Error mapping blobs to any atlas target list')
 				return
