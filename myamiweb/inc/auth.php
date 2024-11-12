@@ -767,12 +767,12 @@ class authlib{
 
 	function filter_password($val) {
 
-			if (strlen($val) < 3) {
+			if (strlen($val) < 5) {
 				return $this->error['passwd_short'];
 
 			}
 
-			if (strlen($val) > 20) {
+			if (strlen($val) > 30) {
 
 				return $this->error['passwd_long'];
 
@@ -787,17 +787,17 @@ class authlib{
 	}
 
 	function filter_username($val) {
-			if (strlen($val) < 3) {
+			if (strlen($val) < 5) {
 
 				return $this->error['username_short'];
 
 			}
-			if (strlen($val) > 20) {
+			if (strlen($val) > 30) {
 
 				return $this->error['username_long'];
 
 			}
-			if (!preg_match("%^[[:alnum:]_]+$%", $val)) {
+			if (!preg_match("%^[[:alnum:]_.]+$%", $val)) {
 
 				return $this->error['username_invalid'];
 
