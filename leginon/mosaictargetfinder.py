@@ -1251,7 +1251,7 @@ class MosaicClickTargetFinder(targetfinder.ClickTargetFinder, imagehandler.Image
 		new_blobs = []
 		def blob_in_polygon(x):
 			return polygon.point_inside_polygon(x['center'][0], x['center'][1], finder_vertices)
-		blobs = filter((lambda x: blob_in_polygon(x.stats)), blobs)
+		blobs = list(filter((lambda x: blob_in_polygon(x.stats)), blobs))
 		return blobs
 
 	def runBlobRankFilter(self, finder_blobs, xytargets):

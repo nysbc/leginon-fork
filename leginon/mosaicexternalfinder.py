@@ -36,6 +36,7 @@ def pointInPolygon(x,y,poly):
 def pointsInBlobs(blobs, points):
 	if len(blobs) == 0:
 		return []
+	points = list(points)
 	has_point =  list(map((lambda x: False), blobs))
 	if len(points) == 0:
 		return has_point
