@@ -402,7 +402,7 @@ class Frame(wx.Frame):
 		item = self.launcherkillmenu.FindItemById(evt.GetId())
 		if item is None:
 			item = self.nodekillmenu.FindItemById(evt.GetId())
-		name = item.GetLabel()
+		name = item.GetItemLabelText()
 		self.manager.killNode(name)
 
 	def onMenuBind(self, evt):
