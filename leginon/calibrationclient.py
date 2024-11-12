@@ -352,7 +352,7 @@ class DoseCalibrationClient(CalibrationClient):
 		try:
 			1.0/sensitivity
 		except ZeroDivisionError:
-			self.logger.error('Dose Rate of exact zero is not accepted')
+			self.node.logger.error('Dose Rate of exact zero is not accepted')
 			return
 		newdata = leginondata.CameraSensitivityCalibrationData()
 		newdata['session'] = self.node.session
@@ -1094,7 +1094,7 @@ class BeamTiltCalibrationClient(MatrixCalibrationClient):
 		for index1, axis1 in enumerate(ordered_axes):
 			data = xydata[axis1]
 			for axis2 in ordered_axes:
-				(slope,t_intercept) = scipy.polyfit(numpy.array(tdata[axis1]),numpy.array(xydata[axis1][axis2]),1)
+				(slope,t_intercept) = numpy.polyfit(numpy.array(tdata[axis1]),numpy.array(xydata[axis1][axis2]),1)
 				index2 = ordered_axes.index(axis2)
 				matrix[index2,index1] = slope
 				ab0[axis2] += t_intercept
@@ -1218,6 +1218,9 @@ class BeamTiltCalibrationClient(MatrixCalibrationClient):
 	def correctImageShiftObjStig(self):
 		shift0, tem, cam, ht, allstigs0, mag = self.getScopeState('Stigmator')
 		objstig0 = allstigs0['objective']
+		if objstig0['x'] is None:
+			self.node.logger.error('Stigmator not available. Do nothing to stig correction')
+			return
 		objstig = self.transformImageShiftToObjStig(shift0, tem, cam, ht, objstig0, mag)
 		self.instrument.tem.Stigmator={'objective':objstig}
 
