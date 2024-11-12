@@ -22,6 +22,9 @@ def dummy():
 	'''
 	return
 
+def _runPtolemyBlobFinder(imagedata):
+		ph.push_lm(imagedata)
+
 class MosaicLearnTargetFinder(mosaicexternalfinder.MosaicScoreTargetFinder):
 	"""
 	External script score finder that operates on individual grid atlas tile.  Multithread
@@ -100,9 +103,6 @@ class MosaicLearnTargetFinder(mosaicexternalfinder.MosaicScoreTargetFinder):
 		self.mergeFinderBlobs()
 		return list(self.finder_blobs)
 
-	def _runPtolemyBlobFinder(self, imagedata):
-		ph.push_lm(imagedata)
-
 	def savePtolemySquare(self,infodict):
 		q=leginondata.PtolemySquareData(session=self.session)
 		q['tile_id']=infodict['image_id']
@@ -153,7 +153,7 @@ class MosaicLearnTargetFinder(mosaicexternalfinder.MosaicScoreTargetFinder):
 		r = leginondata.PtolemySquareData(session=self.session,tile_id=imid).query()
 		if not r:
 			self.logger.info('running ptolemy square finding on imgid=%d' % imid)
-			self.p[imid] = multiprocessing.Process(target=self._runPtolemyBlobFinder, args=(imagedata,))
+			self.p[imid] = multiprocessing.Process(target=_runPtolemyBlobFinder, args=(imagedata,))
 		else:
 			self.logger.info('load current square finding score on imgid=%d' % imid)
 			self.p[imid] = multiprocessing.Process(target=dummy)
@@ -353,6 +353,7 @@ class MosaicLearnTargetFinder(mosaicexternalfinder.MosaicScoreTargetFinder):
 			imid = int(label)
 			if imid not in self.tileblobmap.keys():
 				# from a different atlas
+				print('popping', label, imid)
 				self.ext_blobs.pop(label, None)
 				continue
 			self.tileblobmap[imid] = self.ext_blobs[label]

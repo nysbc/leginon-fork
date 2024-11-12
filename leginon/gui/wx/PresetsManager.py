@@ -1532,7 +1532,10 @@ class AlignDialog(leginon.gui.wx.Dialog.Dialog):
 	def onClose(self, evt):
 		self.enableStart()
 		self.node.doneAllAlignPresets()
-		self.EndModal(0)
+		try:
+			self.EndModal(0)
+		except:
+			pass
 
 class BeamDialog(wx.Dialog):
 	def __init__(self, parent, node):

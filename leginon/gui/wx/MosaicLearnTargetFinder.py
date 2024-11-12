@@ -22,7 +22,7 @@ class Panel(leginon.gui.wx.MosaicScoreTargetFinder.Panel):
 	def addOtherTools(self):
 		leginon.gui.wx.MosaicScoreTargetFinder.Panel.addOtherTools(self)
 		self.toolbar.InsertTool(13, leginon.gui.wx.ToolBar.ID_UPDATE_LEARNING,
-			'learning',shortHelpString='Update learning')
+			'learning',shortHelp='Update learning')
 
 	def onNodeInitialized(self):
 		leginon.gui.wx.MosaicScoreTargetFinder.Panel.onNodeInitialized(self)
