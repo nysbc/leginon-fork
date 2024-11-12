@@ -602,10 +602,13 @@ class Krios(tem.TEM):
 		return self._getColumnModeByMap('ProbeMode', self.cm_probe_mode_map)
 
 	def setProbeMode(self, value):
-		cm_name = 'ProbeMode'
-		req_name, my_const = self._getRequestConstant(cm_name, self.cm_probe_mode_map,value)
-		my_request =getattr(cm_p,req_name)(probe_mode=my_const)
-		_set_by_request(cm_stub, 'Set%s' % cm_name, my_request)
+		current_probe = self.getProbeMode()
+		if current_probe != value:
+			self.setAutoNormalizeEnabled(False)
+			cm_name = 'ProbeMode'
+			req_name, my_const = self._getRequestConstant(cm_name, self.cm_probe_mode_map,value)
+			my_request =getattr(cm_p,req_name)(probe_mode=my_const)
+			_set_by_request(cm_stub, 'Set%s' % cm_name, my_request)
 
 	def getObjectiveModes(self):
 		mode_names = list(map((lambda x: x[0]),self.cm_objective_mode_map))
@@ -723,11 +726,25 @@ class Krios(tem.TEM):
 			self.setObjectiveMode(obj_mode_name)
 			if obj_mode_name not in self.sup_mag_data.keys():
 				self._addSupportedMagData(obj_mode_name)
-			
+			try:
+				prev_index = self.sup_mag_data[obj_mode_name]['displayedMagnifications'].index(self.getMagnification())
+			except ValueError:
+				# none of the valid index
+				prev_index = -1
+			except Exception as e:
+				print("Other error", e)
+				prev_index = -1
 			index = self.sup_mag_data[obj_mode_name]['displayedMagnifications'].index(int_value)
-			mag_float = self._getSupportedMagnifications()['supportedMagnifications'][index]
-			my_request = getattr(mag_p,'SetMagnificationRequest')(magnification=mag_float)
-			_set_by_request(mag_stub, 'SetMagnification', my_request)
+			if prev_index != index:
+				# This makes defocus accuracy better like a objective 
+				# normalization. This assumes that defocus will be set
+				# after this not before.
+				self.setAutoNormalizeEnabled(False)
+				self.setFocus(0.0)
+				# real setting
+				mag_float = self._getSupportedMagnifications()['supportedMagnifications'][index]
+				my_request = getattr(mag_p,'SetMagnificationRequest')(magnification=mag_float)
+				_set_by_request(mag_stub, 'SetMagnification', my_request)
 		else:
 			raise ValueError('Magnification %d not in mapping. Can not determine how to set the value ' % (int_value))
 
@@ -769,7 +786,6 @@ class Krios(tem.TEM):
 		return self._getIlluminationSettings()['illuminatedAreaDiameter']
 
 	def _setIllumination(self, req_key_name, value):
-		req_key_name = 'illuminated_area_diameter'
 		my_device = underscore_to_camelcase(req_key_name,True)
 		kwargs = {}
 		kwargs[req_key_name] = value
@@ -778,12 +794,30 @@ class Krios(tem.TEM):
 		return _get_by_request(illu_stub, 'Set%s' % my_device, my_request)
 
 	def setSpotSize(self, value):
-		req_key_name = 'spot_size_index'
-		return self._setIllumination(req_key_name, value)
+		ss = value
+		prev = self.getSpotSize()
+		if prev != ss:
+			self.setAutoNormalizeEnabled(False)
+			req_key_name = 'spot_size_index'
+			return self._setIllumination(req_key_name, value)
 
 	def setIntensity(self, value):
-		req_key_name = 'illuminated_area_diamter'
-		return self._setIllumination(req_key_name, value)
+		req_key_name = 'illuminated_area_diameter'
+		self._setIllumination(req_key_name, value)
+		# Normalizations
+		if self.normalize_all_after_setting:
+			if self.getDebugAll():
+				self.need_normalize_all
+			if self.need_normalize_all:
+				if self.getDebugAll():
+					print('normalize all')
+				self.normalizeLens('all')
+		# sleep for intensity change
+		extra_sleep = self.getFeiConfig('camera','extra_protector_sleep_time')
+		if self.need_normalize_all and extra_sleep:
+			time.sleep(extra_sleep)
+		#reset changed flag
+		self.setAutoNormalizeEnabled(True)
 
 	def getBeamBlank(self):
 		attr_name = 'GetBeamBlankerState'
@@ -830,9 +864,9 @@ class Krios(tem.TEM):
 			my_request = getattr(norm_p, 'NormalizeRequest')(normalization=const_value)
 			_set_by_request(norm_stub, 'Normalize', my_request)
 
-	def getAutoNormalizeEnabled(self, value):
+	def getAutoNormalizeEnabled(self):
 		try:
-			my_request = norm_p.GetAtutoNormalizeEnabledRequest()
+			my_request = norm_p.GetAutoNormalizeEnabledRequest()
 
 			result = _get_by_request(norm_stub,'GetAutoNormalizeEnabled', my_request)
 			if 'enabled' not in result.keys():
@@ -841,6 +875,7 @@ class Krios(tem.TEM):
 			else:
 				return result['enabled']
 		except:
+			raise
 			# does not have valid function
 			return False
 
@@ -886,11 +921,11 @@ class Krios(tem.TEM):
 		"""
 		#TODO: this might need to be mapped to ImageBeamTilt, not BeamTilt
 		r = self._getAllDeflectors()
-		return _get_vector_xy(r,'beamTilt')
+		return _get_vector_xy(r,'imageBeamTilt')
 
 	def setBeamTilt(self, vector, relative = 'absolute'):
-		my_device = 'BeamTilt'
-		original_vector = getattr(self,'get%s' % my_device)()
+		my_device = 'ImageBeamTilt'
+		original_vector = getattr(self,'getBeamTilt')()
 		min_move = 1e-6
 
 		req_key_name = camelcase_to_underscore(my_device)
@@ -933,9 +968,11 @@ class Krios(tem.TEM):
 		r = self._getAllDeflectors()
 		result = _get_vector_xy(r,'difffractionShift')
 		if result['x'] is None:
-			return None
+			return {'x':0,'y':0}
 
 	def setDiffractionShift(self, vector, relative = 'absolute'):
+		if self.getProjectionMode() != 'diffraction':
+			return
 		my_device = 'DiffractionShift'
 		original_vector = getattr(self,'get%s' % my_device)()
 		min_move = 1e-9
