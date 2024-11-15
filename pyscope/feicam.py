@@ -944,13 +944,13 @@ class Falcon3EC(Falcon3):
 		# with the possibility of using EER, this is better left
 		# as None and use NumberOfFrames in frame processing
 		return None
-
-class Falcon4EC(Falcon3EC):
-	name = 'Falcon4EC'
-	camera_name = 'BM-Falcon'
+	
+class Falcon4(Falcon3):
+	name = 'Falcon4'
+	camera_name = 'EF-Falcon'
 	binning_limits = [1,2,4]
-	electron_counting = True
-	intensity_averaged = False
+	electron_counting = False
+	intensity_averaged = True
 	base_frame_time = 0.02907 # seconds
 	physical_frame_rate = 250 # rolling shutter frames per second
 
@@ -971,7 +971,7 @@ class Falcon4EC(Falcon3EC):
 		self.use_queue = use_queue
 
 	def setInserted(self, value):
-		super(Falcon4EC, self).setInserted(value)
+		super(Falcon4, self).setInserted(value)
 
 	def getExposureTypes(self):
 		"""
@@ -995,6 +995,39 @@ class Falcon4EC(Falcon3EC):
 		if len(files) == 0:
 			return None
 		return files[-1]
+
+class Falcon4ef(Falcon4):
+	name = 'Falcon4'
+	camera_name = 'EF-Falcon'
+	binning_limits = [1,2,4]
+	electron_counting = False
+	intensity_averaged = True
+	base_frame_time = 0.02907 # seconds
+	physical_frame_rate = 250 # rolling shutter frames per second
+
+	def __init__(self):
+		super(Falcon4ef, self).__init__()
+		if self.ef is None:
+			raise RuntimeError('TFS energy filter not available')
+		self.ef_control = Selectris()
+		self.ef_control.setup(self.ef)
+		for attr_name in dir(self.ef_control):
+			if attr_name.startswith('get') or attr_name.startswith('set'):
+				setattr(self,attr_name, getattr(self.ef_control,attr_name))
+
+class Falcon4EC(Falcon4):
+	name = 'Falcon4EC'
+	camera_name = 'BM-Falcon'
+	binning_limits = [1,2,4]
+	electron_counting = True
+	intensity_averaged = False
+	base_frame_time = 0.02907 # seconds
+	physical_frame_rate = 250 # rolling shutter frames per second
+
+	def getUseFrames(self):
+		# with the possibility of using EER, this is better left
+		# as None and use NumberOfFrames in frame processing
+		return None
 
 class Selectris(object):
 	def setup(self, ef_pointer):
