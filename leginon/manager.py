@@ -942,7 +942,7 @@ class Manager(node.Node):
 	def slackNotification(self, msg):
 		msg = '%s %s' % (self.tem_host, msg)
 		try:
-			from slack import slack_interface
+			from slackbot import slack_interface
 			slack_inst = slack_interface.SlackInterface()
 			channel = slack_inst.getDefaultChannel()
 			slack_inst.sendMessage(channel,'%s ' % (msg))
