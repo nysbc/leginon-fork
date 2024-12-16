@@ -1,6 +1,6 @@
 import os
 import socket
-from . import slack_interface
+from slack_leginon import slack_interface
 
 sc = slack_interface.SlackInterface()
 dc = sc.getDefaultChannel()

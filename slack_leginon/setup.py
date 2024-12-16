@@ -1,10 +1,10 @@
 from distutils.core import setup
 
 setup(
-	name='slack',
-	version='0.1',
-	description='slack client hook',
-	packages=['slack'],
-	package_dir={'slack': ''},
+	name='slack_leginon',
+	version='0.2.0',
+	description='slack client hook for leginon',
+	packages=['slack_leginon'],
+	package_dir={'slack_leginon': ''},
 	scripts = ['slack_test.py',],
 )

@@ -1,14 +1,14 @@
 #!/usr/env/bin python
 
 import os
-from . import slackconfigparser
+from slack_leginon import slackconfigparser
 import subprocess
 import sys
 
 from optparse import OptionParser
-from slackclient import SlackClient
+from slack import WebClient as SlackClient
 
-#Using slackclient 1.0.0 for now until we upgrade to python2.7 (at least). The latest version, 1.0.9, does not work.
+#Using slackclient 2.9.4
 
 # class to manage leginon and appion interactions with slack.
 class SlackInterface(SlackClient):
@@ -46,15 +46,13 @@ class SlackInterface(SlackClient):
 
 		if checkchannel is True:
 			if slackchannel in self.getChannelNames():
-				return self.client.api_call(
-						"chat.postMessage",
+				return self.client.chat_postMessage(
 						channel=slackchannel,
 						text=message)
 			else:
-				self.client.api_call('channels.create',name=slackchannel,validate=True)
-				print(( 'Channel '+slackchannel+' does not exist; creating channel.'))
+				print(( 'Channel '+slackchannel+' does not exist; Please create channel in Slack.'))
 
-		return self.client.api_call(
+		return self.client.chat_postMessage(
 				"chat.postMessage",
 				channel=slackchannel,
 				text=message)	
