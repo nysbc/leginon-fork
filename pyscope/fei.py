@@ -226,12 +226,6 @@ class Tecnai(tem.TEM):
 			relax = 0
 		return relax
 
-	def getMagnificationsInitialized(self):
-		if self.magnifications:
-			return True
-		else:
-			return False
-
 	def setCorrectedStagePosition(self, value):
 		self.correctedstage = bool(value)
 		return self.correctedstage
@@ -1059,12 +1053,6 @@ class Tecnai(tem.TEM):
 	def setMagnificationIndex(self, value):
 		setattr(self.tecnai.Projection,self.mag_attr_name+'Index', value + 1)
 
-	def getMagnifications(self):
-		return self.magnifications
-
-	def setMagnifications(self, magnifications):
-		self.magnifications = magnifications
-
 	def findMagnifications(self):
 		savedindex = self.getMagnificationIndex()
 		magnifications = []
@@ -1094,7 +1082,11 @@ class Tecnai(tem.TEM):
 		if mode_id not in list(self.projection_submodes.keys()):
 			raise ValueError('unknown projection submode')
 		# FEI scopes don't have cases with the same mag in different mode, yet.
-		self.addProjectionSubModeMap(mag, mode_name, mode_id, overwrite=True)
+		if mode_name not in ('LM','LAD'):
+			obj_mode_name = 'hm'
+		else:
+			obj_mode_name = mode_name.lower()
+		self.addProjectionSubModeMap(mag, mode_name, mode_id, obj_mode_name, overwrite=True)
 
 	def getStagePosition(self):
 		value = {'x':None,'y':None,'z':None,'a':None,'b':None}
@@ -1923,7 +1915,7 @@ class Tecnai(tem.TEM):
 		""" need to find return states
 				0 - no error, but also could be no action taken.
 		"""
-		return self.tecnai.PerformCassetteInventory()
+		return self.tecnai.AutoLoader.PerformCassetteInventory()
 
 	def getIsEFtem(self):
 		flag = self.tecnai.Projection.LensProgram
