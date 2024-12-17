@@ -21,7 +21,7 @@ def connect(**kwargs):
 
 def escape(anystring):
 	'addslashes to any quotes if necessary'
-	return pymysql.escape_string(anystring)
+	return pymysql.converters.escape_string(anystring)
 
 def addbackquotes(anystring):
 	return "`%s`" % (anystring,)
