@@ -326,6 +326,7 @@ class HoleFinder(icefinderback.IceFinder):
 		# make make list of blob coords:
 		points = []
 		pointdict = {}
+		accept_all = False
 		if len(blobs) < 2 and extend !='off':
 			self.update_result('holes', [])
 			return
