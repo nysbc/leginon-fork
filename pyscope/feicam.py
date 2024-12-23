@@ -982,20 +982,6 @@ class Falcon4(Falcon3):
 	def getSaveEer(self):
 		return self.frame_format == 'eer' and self.electron_counting
 
-	def getNormImagePath(self):
-		"""
-		return the path for the latest gain file.
-		"""
-		norm_dir = self.getFeiConfig('camera','eer_gain_reference_dir')
-		if not os.path.isdir(norm_dir):
-			return None
-		pattern = os.path.join(norm_dir,'*.gain')
-		files = glob.glob(pattern)
-		files.sort()
-		if len(files) == 0:
-			return None
-		return files[-1]
-
 class Falcon4ef(Falcon4):
 	name = 'Falcon4'
 	camera_name = 'EF-Falcon'
