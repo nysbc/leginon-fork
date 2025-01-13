@@ -945,8 +945,11 @@ class Tecnai(tem.TEM):
 			pass
 		else:
 			raise ValueError
-		# normalize by always sending Eucentric focus first
-		self.tecnai.Projection.Focus = 0.0
+		# normalize by always sending to eucentric focus according to tfs first
+		norm_focus = self.getFeiConfig('optics','normalizing_focus_value')
+		if norm_focus is None:
+			norm_focus = 0.0
+		self.tecnai.Projection.Focus = norm_focus
 		self.tecnai.Projection.Defocus = defocus
 	
 	def resetDefocus(self):
@@ -1650,6 +1653,10 @@ class Tecnai(tem.TEM):
 		return float(self.tecnai.Projection.Focus)
 
 	def setFocus(self, value):
+		"""
+		Set focus value relative to instrument eucentric focus value.
+		The unit is objective lens current unit in tem scripting.
+		"""
 		self.tecnai.Projection.Focus = value
 
 	def getFilmStock(self):

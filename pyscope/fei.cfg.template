@@ -36,6 +36,13 @@ PRE_DIFFRACTION_SA_MAGNIFICATION_INDEX = 0
 # talos pull this in fraction of lens current
 MINIMUM_INTENSITY_MOVEMENT = 5.0e-8
 
+# Set absolute focus value relative to TUI Eucentric focus value.
+# This is used for defocus setting normalization.
+# Change this value to other than zero if leginon gives a very different
+# eucentric height and thus eucentric focus. The unit depends on the TFS
+# api.  Meters in UTAPI, lens current in TEMScripting.
+NORMALIZING_FOCUS_VALUE = 0.0
+
 [aperture]
 # Disable control of auto apertures if not working or not available
 # not all versions of microscope software allows auto aperture control
