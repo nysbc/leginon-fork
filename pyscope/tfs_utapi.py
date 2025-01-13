@@ -710,10 +710,10 @@ class Krios(tem.TEM):
 			precision = 100
 		elif mag_float < 14000.0:
 			precision = 500
-		elif mag_float < 100000.0:
-			precision = 1000
-		else:
+		elif mag_float < 400000.0:
 			precision = 5000
+		else:
+			precision = 10000
 		return precision*int(round(mag_float/precision))
 
 	def setMagnification(self, int_value):
