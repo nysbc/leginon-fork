@@ -82,6 +82,7 @@ class TEM(baseinstrument.BaseInstrument):
 		{'name': 'Stigmator', 'type': 'property'},
 		{'name': 'TurboPump', 'type': 'property'},
 		{'name': 'ProjectionSubModeMap', 'type': 'property'},
+		{'name': 'PhasePlatePlaneShift', 'type': 'property'},
 
 		######## methods
 		{'name': 'filmExposure', 'type': 'method'},
@@ -188,6 +189,12 @@ class TEM(baseinstrument.BaseInstrument):
 
 	def nextPhasePlate(self):
 		print("next position")
+
+	def getPhasePlatePlaneShift(self):
+		return self.getBeamTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setBeamTilt(vector, relative)
 
 	def getColumnPressure(self):
 		return 1.0 #Pascal

@@ -986,16 +986,26 @@ class Krios(tem.TEM):
 		"""
 		X lens Tilt in radians for vector axes x,y.
 		"""
+		if not self.hasXLens():
+			return {'x':0,'y':0}
 		r = self._getAllDeflectors()
 		return _get_vector_xy(r,'xDeflectorTilt')
 
 	def setXDeflectorTilt(self, vector, relative = 'absolute'):
+		if not self.hasXLens():
+			return
 		my_device = 'XDeflectorTilt'
 		original_vector = getattr(self,'get%s' % my_device)()
 		min_move = 1e-6
 
 		req_key_name = camelcase_to_underscore(my_device)
 		self._setDeflector(req_key_name, vector, original_vector, min_move, relative)
+
+	def getPhasePlatePlaneShift(self):
+		return self.getBeamTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setBeamTilt(vector, relative)
 
 	def getXDeflectorShift(self):
 		"""
@@ -1641,6 +1651,12 @@ class KriosXL(Krios):
 	use_normalization = True
 	projection_lens_program = 'TEM XL'
 
+	def getPhasePlatePlaneShift(self):
+		return self.getXDeflectorTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setXDeflectorTilt(vector, relative)
+
 class EFKrios(Krios):
 	name = 'EF-Krios'
 	column_type = 'titan'
@@ -1652,3 +1668,10 @@ class EFKriosXL(EFKrios):
 	column_type = 'titan'
 	use_normalization = True
 	projection_lens_program = 'EFTEM XL'
+
+	def getPhasePlatePlaneShift(self):
+		return self.getXDeflectorTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setXDeflectorTilt(vector, relative)
+
