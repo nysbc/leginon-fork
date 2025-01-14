@@ -441,6 +441,7 @@ class SimTEM(tem.TEM):
 
 	def setMagnification(self, value):
 		try:
+			value = int(value) #TODO why is this string from gui ?
 			self.magnification_index = self.magnifications.index(value)
 			self.saveSimPar('magnification', value)
 		except ValueError:

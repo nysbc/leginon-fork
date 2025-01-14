@@ -229,7 +229,7 @@ class EM(node.Node):
 					try:
 						value = instrument._execute(self.name, attribute, 'r')
 						if isinstance(value, Exception):
-							raise
+							raise value
 						else:
 							values[attribute] = value
 					except TypeError:
@@ -243,12 +243,12 @@ class EM(node.Node):
 					try:
 						value = instrument._execute(self.name, attribute, 'w', (value,))
 						if isinstance(value, Exception):
-							raise
+							raise value
 						else:
 							values[attribute] = value
 						value = instrument._execute(self.name, attribute, 'r')
 						if isinstance(value, Exception):
-							raise
+							raise value
 						else:
 							values[attribute] = value
 					except TypeError:

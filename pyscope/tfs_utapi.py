@@ -712,8 +712,10 @@ class Krios(tem.TEM):
 			precision = 500
 		elif mag_float < 100000.0:
 			precision = 1000
-		else:
+		elif mag_float < 400000.0:
 			precision = 5000
+		else:
+			precision = 10000
 		return precision*int(round(mag_float/precision))
 
 	def setMagnification(self, int_value):
@@ -984,16 +986,26 @@ class Krios(tem.TEM):
 		"""
 		X lens Tilt in radians for vector axes x,y.
 		"""
+		if not self.hasXLens():
+			return {'x':0,'y':0}
 		r = self._getAllDeflectors()
 		return _get_vector_xy(r,'xDeflectorTilt')
 
 	def setXDeflectorTilt(self, vector, relative = 'absolute'):
+		if not self.hasXLens():
+			return
 		my_device = 'XDeflectorTilt'
 		original_vector = getattr(self,'get%s' % my_device)()
 		min_move = 1e-6
 
 		req_key_name = camelcase_to_underscore(my_device)
 		self._setDeflector(req_key_name, vector, original_vector, min_move, relative)
+
+	def getPhasePlatePlaneShift(self):
+		return self.getBeamTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setBeamTilt(vector, relative)
 
 	def getXDeflectorShift(self):
 		"""
@@ -1071,12 +1083,20 @@ class Krios(tem.TEM):
 		return _get_by_request(foc_stub, 'GetFocusSettings', my_request)
 	
 	def getFocus(self):
+		"""
+		Return focus value relative to instrument eucentric focus value.
+		The unit is meter in utapi but in current in tem scripting.
+		"""
 		try:
 			return self._getFocusSettings()['focus']
 		except KeyError:
 			return 0.0
 
 	def setFocus(self, value):
+		"""
+		Set focus value relative to instrument eucentric focus value.
+		The unit is meter in utapi but in current in tem scripting.
+		"""
 		my_request = getattr(foc_p,'FocusRequest')(focus=value)
 		return _get_by_request(foc_stub, 'SetFocus', my_request)
 
@@ -1094,8 +1114,11 @@ class Krios(tem.TEM):
 			pass
 		else:
 			raise ValueError
-		# normalize by always sending 0 focus first
-		self.setFocus(0.0)
+		# normalize by always sending to eucentric focus according to tfs first
+		norm_focus = self.getFeiConfig('optics','normalizing_focus_value')
+		if norm_focus is None:
+			norm_focus = 0.0
+		self.setFocus(norm_focus)
 		my_request = getattr(foc_p,'DefocusRequest')(defocus=defocus)
 		return _get_by_request(foc_stub, 'SetDefocus', my_request)
 	
@@ -1628,6 +1651,12 @@ class KriosXL(Krios):
 	use_normalization = True
 	projection_lens_program = 'TEM XL'
 
+	def getPhasePlatePlaneShift(self):
+		return self.getXDeflectorTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setXDeflectorTilt(vector, relative)
+
 class EFKrios(Krios):
 	name = 'EF-Krios'
 	column_type = 'titan'
@@ -1639,3 +1668,10 @@ class EFKriosXL(EFKrios):
 	column_type = 'titan'
 	use_normalization = True
 	projection_lens_program = 'EFTEM XL'
+
+	def getPhasePlatePlaneShift(self):
+		return self.getXDeflectorTilt()
+
+	def setPhasePlatePlaneShift(self, vector, relative = 'absolute'):
+		return self.setXDeflectorTilt(vector, relative)
+
