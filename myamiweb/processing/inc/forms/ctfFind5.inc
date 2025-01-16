@@ -10,7 +10,7 @@ require_once "basicLoopForm.inc";
 require_once "ddstackSelectTable.inc";
 require_once "dbDefocusTable.inc";
 
-class CtfFind4 extends BasicLoopForm
+class CtfFind5 extends BasicLoopForm
 {
 	function __construct( $expId, $extraHTML='', $ampcontrast='0.07', $fieldsize='1024',
 								$resmin='50', $resmax='4', $defstep='0.1', $numstep='25', $dast='0.05', $bestdb=true, $nominal='', $parallel=true, $useDDStack=false, $ddstackid=false, $phase_plate=false, $min_phase_shift=10, $max_phase_shift=170, $phase_search_step=10, $num_frame_avg=7) 
@@ -24,10 +24,10 @@ class CtfFind4 extends BasicLoopForm
 		$this->setPublications( $pubList );
 		$this->setJobType( 'ctfestimate' );
 		$this->setOutputDirectory( 'ctf' );
-		$this->setBaseRunName( 'ctffind4run' );
-		$this->setTitle( 'CTFFIND v4 Launcher' );
-		$this->setHeading( 'CTF Estimation with CTFFIND v4' );
-		$this->setExeFile( 'ctffind4.py' );
+		$this->setBaseRunName( 'ctffind5run' );
+		$this->setTitle( 'CTFFIND v5 Launcher' );
+		$this->setHeading( 'CTF Estimation with CTFFIND v5' );
+		$this->setExeFile( 'ctffind5.py' );
 		$this->setGuideURL( "http://emg.nysbc.org/redmine/projects/appion/wiki/Appion_Processing" );
 		$this->setTestable( False ); // True to activate "test single image".
 		$this->setUseLegOutDir( False ); // The output directory will be created in the Appion run directory rather than Leginon.
