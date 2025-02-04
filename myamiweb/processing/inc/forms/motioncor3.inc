@@ -9,9 +9,9 @@
 
 require_once "basicLoopForm.inc";
 require_once "makeDDStackForm.inc";
-class motioncor2_ucsf extends MakeDDStackForm
+class motioncor3 extends MakeDDStackForm
 
-// Removed defergpu, alignoffset,alignccbox, nrw to make compatible with motioncor2 version
+// Removed defergpu, alignoffset,alignccbox, nrw to make compatible with motioncor3 version
 {
 	function __construct(  $expId, $errorHTML='', $infoHTML='',$align=True,$bin=1, $rendered_frame_size=1, $nokeepstack=True, $ddstartframe=0, $ddnframe='',$alignlabel='a',$nrw=1, $MaskCentrow=0, $MaskCentcol=0, $MaskSizerows=1.0, $MaskSizecols=1.0, $Patchrows=5, $Patchcols=5, $Iter=7,$Tol=0.5,$Bft_global=500.0,$Bft_local=100.0,$FmRef=0,$totaldose='', $doseweight=true, $gpuids=0 )
 	{
@@ -25,9 +25,9 @@ class motioncor2_ucsf extends MakeDDStackForm
 		$this->setJobType( 'makeddrawframestack' );
 		$this->setOutputDirectory( 'ddstack' );
 		$this->setBaseRunName( 'ddstack' );
-		$this->setTitle( 'makeDDAlignMotionCor2 Launcher' );
-		$this->setHeading( 'Create a Direct Detector Aligned Frame Stack with MotionCor2' );
-		$this->setExeFile( 'makeDDAlignMotionCor2_UCSF.py' );
+		$this->setTitle( 'makeDDAlignMotionCor3 Launcher' );
+		$this->setHeading( 'Create a Direct Detector Aligned Frame Stack with MotionCor3' );
+		$this->setExeFile( 'makeDDAlignMotionCor3.py' );
 		$this->setGuideURL( "http://emg.nysbc.org/redmine/projects/appion/wiki/Appion_Processing" );
 		$this->setTestable( True ); // True to activate "test single image".
 		$this->setUseLegOutDir( False ); // The output directory will be created in the Appion run directory rather than Leginon.
@@ -64,7 +64,7 @@ class motioncor2_ucsf extends MakeDDStackForm
 		$params->addParam( "Bft_local", $Bft_local, "Local B Factor in A^2");
 		$params->addParam( "alignlabel", $alignlabel, "append label to aligned image" );
 
-#		Using 'nrw' notation from motioncor2_ucsf instead of 'nrw' in motioncorr-Purdue
+#		Using 'nrw' notation from motioncor3 instead of 'nrw' in motioncorr-Purdue
 		$params->addParam( "nrw", $nrw, "Number of frames in running average window");
 #		$params->addParam( "flp", $flp, "Flip frames along Y axis.; 0 = no flip, 1 = flip");
 	}
@@ -180,7 +180,7 @@ class motioncor2_ucsf extends MakeDDStackForm
 				if ( $rendered_nframes > 300 ) {
 					$msg .= "<B>Error</B> ".$rendered_nframes." rendered frames for alignment is too much. Please use larger rendered frame size.";
 				}
-// No alignoffset in motioncor2_ucsf, removing alignoffset check
+// No alignoffset in motioncor3, removing alignoffset check
 //				$alignoffset = $params->getParamValue('alignoffset');
 //				if ( $nframes / 2 < $alignoffset ) $msg .= "<B>Error</B> Align frame offset must be less than half of the number of frames saved.<br/>";
 //				if ( $nrw > $nframes / 3 ) $msg .= "<B>Error</B> Number of frames in running average window should not be larger than 1/3 of number of frames saved.<br/>";

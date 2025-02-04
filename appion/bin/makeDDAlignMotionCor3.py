@@ -7,10 +7,10 @@ from appionlib import apDDprocess
 from appionlib import apDatabase
 from appionlib import apDisplay
 
-class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop):
+class MotionCor3AlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop):
 	#=======================
 	def setupParserOptions(self):
-		super(MotionCor2UCSFAlignStackLoop,self).setupParserOptions()
+		super(MotionCor3AlignStackLoop,self).setupParserOptions()
 
 		self.parser.add_option("--gpuids", dest="gpuids", default='0')
 		
@@ -61,18 +61,18 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 		self.parser.add_option("--gainfile", dest="gainfile", default="", help="Gain file name", metavar="")
 
 		self.parser.add_option("--forceTiff", dest="forceTiff", default=False,
-			action="store_true", help="ForceTiff will be used to specify motioncor2 input of TIFF file")
+			action="store_true", help="ForceTiff will be used to specify motioncor input of TIFF file")
 
 	def addBinOption(self):
 		self.parser.add_option("--bin",dest="bin",metavar="#",type=float,default="1.0",
-			help="Binning factor relative to the dd stack. MotionCor2 takes float value (optional)")
+			help="Binning factor relative to the dd stack. MotionCor3 takes float value (optional)")
 
 	#=======================
 	def checkConflicts(self):
-		super(MotionCor2UCSFAlignStackLoop,self).checkConflicts()
+		super(MotionCor3AlignStackLoop,self).checkConflicts()
 		# does NOT keep stack by default
 		if self.params['keepstack'] is True:
-			apDisplay.printWarning('Frame stack saving not available to MotionCor2 from UCSF')
+			apDisplay.printWarning('Frame stack saving not available to MotionCor3')
 			self.params['keepstack'] = False
 
 	def getAlignBin(self):
@@ -96,7 +96,7 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 			return True
 
 	def setFrameAligner(self):
-		self.framealigner = apDDFrameAligner.MotionCor2_UCSF()
+		self.framealigner = apDDFrameAligner.MotionCor3()
 		# use the first gpuids as gpuid in log. See why this is set here in Issue #5576
 		self.params['gpuid'] = int(self.params['gpuids'].split(',')[0].strip())
 
@@ -104,7 +104,7 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 		# The alignment is done in tempdir (a local directory to reduce network traffic)
 		# include both hostname and gpu to identify the temp output
 		#self.temp_aligned_sumpath = 'temp%s.gpuid_%d_sum.mrc' % (self.hostname, self.gpuid)
-		super(MotionCor2UCSFAlignStackLoop,self).setOtherProcessImageResultParams()
+		super(MotionCor3AlignStackLoop,self).setOtherProcessImageResultParams()
 		self.temp_aligned_dw_sumpath = 'temp%s.gpuid_%d_sum_DW.mrc' % (self.hostname, self.gpuid)
 		#self.temp_aligned_stackpath = 'temp%s.gpuid_%d_aligned_st.mrc' % (self.hostname, self.gpuid)
 		# NOTE: self.params in self.framealigner alignparam mapping are directly transferred.
@@ -173,7 +173,7 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 		if os.path.isfile(temp_aligned_sumpath):
 			if self.params['doseweight'] is True and self.has_dose:
 				shutil.move(temp_aligned_dw_sumpath,self.dd.aligned_dw_sumpath)
-		return super(MotionCor2UCSFAlignStackLoop,self).organizeAlignedSum()
+		return super(MotionCor3AlignStackLoop,self).organizeAlignedSum()
 
 	def organizeAlignedStack(self):
 		'''
@@ -186,8 +186,8 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 				self.params['align_dw_label'] = self.params['alignlabel']+"-DW"
 				self.aligned_dw_imagedata = self.dd.makeAlignedDWImageData(alignlabel=self.params['align_dw_label'])
 
-		super(MotionCor2UCSFAlignStackLoop,self).organizeAlignedStack()
+		super(MotionCor3AlignStackLoop,self).organizeAlignedStack()
 
 if __name__ == '__main__':
-	makeStack = MotionCor2UCSFAlignStackLoop()
+	makeStack = MotionCor3AlignStackLoop()
 	makeStack.run()

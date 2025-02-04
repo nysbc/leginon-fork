@@ -209,9 +209,9 @@ class MotionCorr_Purdue(MotionCorr1):
 			if self.getNewFlipAlongYAxis() == 0:
 				del self.alignparams['nrw']
 			
-class MotionCor2_UCSF(DDFrameAligner):
+class MotionCor3(DDFrameAligner):
 	def __init__(self):
-		self.executable = 'motioncor2'
+		self.executable = 'MotionCor3'
 		DDFrameAligner.__init__(self)
 
 	def setKV(self, kv):
@@ -476,11 +476,11 @@ class MotionCor2_UCSF(DDFrameAligner):
 	def writeLogFile(self, outbuffer):
 		''' 
 		takes output log buffer from running frame aligner 
-		will write motioncor2 log file and standard log file that is readable by appion image viewer (motioncorr1 format)
+		will write motioncor3 log file and standard log file that is readable by appion image viewer (motioncorr1 format)
 		'''
 
-		### motioncor2 format
-		log2 = self.framestackpath[:-4]+'_Log.motioncor2.txt'
+		### motioncor3 format
+		log2 = self.framestackpath[:-4]+'_Log.motioncor3.txt'
 		f = open(log2, "w")
 		f.write(outbuffer.decode())
 		f.close()
@@ -491,7 +491,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 		outbuffer = f.readlines()
 		f.close()
 
-		### parse motioncor2 output
+		### parse motioncor3 output
 		temp = []
 		found = False
 		for line in outbuffer:
@@ -509,7 +509,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 				shy = float(l.split()[-1])
 				shifts.append([shx, shy])
 
-		### convert motioncorr2 output to motioncorr1 format
+		### convert motioncorr3 output to motioncorr1 format
 		binning = 1.0
 		if 'FtBin' in list(self.alignparams.keys()):
 			binning = self.alignparams['FtBin']
