@@ -75,7 +75,7 @@ class ScriptHostName(Data):
 			('distro', str),
 			('arch', str),
 			('nproc', int),
-			('memory', int),
+			('memory', int), #gB to fit in int(20) in db
 			('cpu_vendor', str),
 			('gpu_vendor', str),
 		)
