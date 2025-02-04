@@ -246,7 +246,7 @@ class AppionScript(basicScript.BasicScript):
 		hostq['system'] = apParam.getSystemName()
 		hostq['distro'] = apParam.getLinuxDistro()
 		hostq['nproc'] = apParam.getNumProcessors()
-		hostq['memory'] = apParam.getTotalMemory()
+		hostq['memory'] = apParam.getTotalMemory()//1024//1024 # gB
 		hostq['cpu_vendor'] = apParam.getCPUVendor()
 		hostq['gpu_vendor'] = apParam.getGPUVendor()
 		hostq['arch'] = apParam.getMachineArch()

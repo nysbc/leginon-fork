@@ -846,7 +846,7 @@ class EditFocusCalibrationDialog(leginon.gui.wx.MatrixCalibrator.EditMatrixDialo
 		self.rotation_center_entries = {}
 		for i, axis in enumerate(('x', 'y')):
 			label = wx.StaticText(self, -1, axis)
-			self.sz.Add(label, (row + 1, i + 1), (1, 1), wx.ALIGN_CENTER|wx.ALIGN_BOTTOM)
+			self.sz.Add(label, (row + 1, i + 1), (1, 1), wx.ALIGN_CENTRE_HORIZONTAL|wx.ALIGN_BOTTOM)
 			entry = FloatEntry(self, -1, chars=9)
 			if self.rotation_center is not None:
 				try:
