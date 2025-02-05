@@ -35,9 +35,9 @@ echo "<table border='1' class='tableborder' width='640'>\n";
 echo "<tr><td width='100' align='center'>\n";
 echo "  <img src='img/appionlogo.jpg' width='96'>\n";
 echo "</td><td>\n";
-echo "  <h3><a href='runAppionLoop.php?expId=$expId&form=motioncor2_ucsf'>MotionCor2</a></h3>\n";
+echo "  <h3><a href='runAppionLoop.php?expId=$expId&form=motioncor3'>MotionCor3</a></h3>\n";
 echo " <p> GPU program </p>";
-echo " <p>MotionCor2 is an improved version of MotionCorr developed in David Agard lab at UCSF. The main new features are: (a) bad pixel correction from frames; (b) patch average support; (c) dose-weighted sum image output. The implementation here is based on the version released in August of 2016."
+echo " <p>MotionCor3 is an improved version of MotionCorr developed in David Agard lab at UCSF. The main new features are: (a) bad pixel correction from frames; (b) patch average support; (c) dose-weighted sum image output. The implementation here is based on the 1.0.1 version released in 2023."
         ."</p>\n";
 echo "</td></tr>\n";
 
